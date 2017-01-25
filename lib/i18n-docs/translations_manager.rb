@@ -140,6 +140,15 @@ module I18nDocs
         begin
           self.config = YAML.load_file(config_file) || {}
           self.config['options'] ||= {}
+          
+          # Set Google Docs options properly if env
+          self.config['google_drive_credentials']['oauth'].each do |key, value|
+            # Is value a variable?
+            if value.match /\${(.+)}/
+              self.config['google_drive_credentials']['oauth'][key] = eval(value.match(/\${(.+)}/)[1])
+            end
+          end
+                    
           true
         rescue Psych::SyntaxError => e
           puts "YAML parsing error"
